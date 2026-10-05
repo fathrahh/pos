@@ -16,12 +16,31 @@ import (
 	"pos-saas/api/internal/config"
 	handler "pos-saas/api/internal/handler/http"
 	"pos-saas/api/internal/middleware"
+	"pos-saas/api/internal/repository/postgres"
+	"pos-saas/api/internal/usecase"
 	"pos-saas/api/pkg/response"
 )
 
 func main() {
 	cfg := config.Load()
 
+	// 1. Database Connection
+	db, err := postgres.InitDB(cfg.DatabaseURL)
+	if err != nil {
+		log.Printf("Warning: failed to connect to database (%s): %v. API will start with DB unready.", cfg.DatabaseURL, err)
+	} else {
+		log.Println("Database connection established successfully")
+	}
+
+	// 2. Initialize Repositories & Usecases
+	var productHandler *handler.ProductHandler
+	if db != nil {
+		productRepo := postgres.NewProductRepository(db)
+		productUsecase := usecase.NewProductUsecase(productRepo)
+		productHandler = handler.NewProductHandler(productUsecase)
+	}
+
+	// 3. Setup Fiber App
 	app := fiber.New(fiber.Config{
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -56,6 +75,15 @@ func main() {
 			"tenant_id": tenantID,
 		})
 	})
+
+	if productHandler != nil {
+		products := protected.Group("/products")
+		products.Post("/", productHandler.Create)
+		products.Get("/", productHandler.List)
+		products.Get("/:id", productHandler.GetByID)
+		products.Put("/:id", productHandler.Update)
+		products.Delete("/:id", productHandler.Delete)
+	}
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
