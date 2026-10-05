@@ -1,19 +1,17 @@
 package main
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/go-chi/chi/v5"
-	chiMiddleware "github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 
 	"pos-saas/api/internal/config"
 	handler "pos-saas/api/internal/handler/http"
@@ -24,68 +22,56 @@ import (
 func main() {
 	cfg := config.Load()
 
-	r := chi.NewRouter()
-
-	r.Use(chiMiddleware.RequestID)
-	r.Use(chiMiddleware.RealIP)
-	r.Use(chiMiddleware.Logger)
-	r.Use(chiMiddleware.Recoverer)
-	r.Use(chiMiddleware.Timeout(30 * time.Second))
-
-	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:*", "https://*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Tenant-ID", "X-Outlet-ID"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
-
-	healthHandler := handler.NewHealthHandler()
-	r.Get("/health", healthHandler.Check)
-
-	// Protected tenant-scoped API routes
-	r.Route("/api/v1", func(v1 chi.Router) {
-		v1.Get("/", func(w http.ResponseWriter, r *http.Request) {
-			response.JSON(w, http.StatusOK, map[string]string{
-				"message": "POS SaaS API v1",
-			})
-		})
-
-		v1.Group(func(protected chi.Router) {
-			protected.Use(middleware.RequireTenant)
-			protected.Get("/me", func(w http.ResponseWriter, r *http.Request) {
-				tenantID := middleware.GetTenantID(r.Context())
-				response.JSON(w, http.StatusOK, map[string]string{
-					"tenant_id": tenantID,
-				})
-			})
-		})
-	})
-
-	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", cfg.Port),
-		Handler:      r,
+	app := fiber.New(fiber.Config{
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
-	}
+	})
+
+	app.Use(recover.New())
+	app.Use(logger.New())
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:*,https://*",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization, X-Tenant-ID, X-Outlet-ID",
+		AllowMethods:     "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+		AllowCredentials: true,
+	}))
+
+	healthHandler := handler.NewHealthHandler()
+	app.Get("/health", healthHandler.Check)
+
+	// API v1
+	v1 := app.Group("/api/v1")
+	v1.Get("/", func(c *fiber.Ctx) error {
+		return response.JSON(c, fiber.StatusOK, map[string]string{
+			"message": "POS SaaS API v1",
+		})
+	})
+
+	// Protected tenant-scoped group
+	protected := v1.Group("/", middleware.RequireTenant())
+	protected.Get("/me", func(c *fiber.Ctx) error {
+		tenantID := middleware.GetTenantID(c.UserContext())
+		return response.JSON(c, fiber.StatusOK, map[string]string{
+			"tenant_id": tenantID,
+		})
+	})
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		log.Printf("POS SaaS Backend running on port :%s (%s)", cfg.Port, cfg.Environment)
-		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		addr := fmt.Sprintf(":%s", cfg.Port)
+		log.Printf("POS SaaS Backend (Fiber) running on port %s (%s)", addr, cfg.Environment)
+		if err := app.Listen(addr); err != nil {
 			log.Fatalf("Server startup failed: %v", err)
 		}
 	}()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-
 	log.Println("Shutting down server gracefully...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
+	if err := app.ShutdownWithTimeout(10 * time.Second); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 

@@ -1,7 +1,7 @@
 package http
 
 import (
-	"net/http"
+	"github.com/gofiber/fiber/v2"
 
 	"pos-saas/api/pkg/response"
 )
@@ -12,8 +12,8 @@ func NewHealthHandler() *HealthHandler {
 	return &HealthHandler{}
 }
 
-func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
-	response.JSON(w, http.StatusOK, map[string]any{
+func (h *HealthHandler) Check(c *fiber.Ctx) error {
+	return response.JSON(c, fiber.StatusOK, map[string]any{
 		"status":  "healthy",
 		"service": "pos-saas-api",
 	})

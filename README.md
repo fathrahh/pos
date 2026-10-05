@@ -4,7 +4,7 @@ A production-grade, multi-tenant Point of Sale (POS) application built with Gola
 
 ## 1. Tech Stack
 
-- **Backend (`services/api`)**: Golang Clean Architecture, `chi` router, GORM + PostgreSQL.
+- **Backend (`services/api`)**: Golang Clean Architecture, `gofiber/fiber/v2` router, GORM + PostgreSQL.
 - **Frontend Dashboard (`apps/web`)**: Svelte 5 (Runes) + Vite SPA mode.
 - **Mobile POS (`apps/mobile`)**: React Native (planned Phase 2).
 - **Monorepo Tooling**: `pnpm` workspaces, Turborepo, `go.work`, and root `Makefile`.

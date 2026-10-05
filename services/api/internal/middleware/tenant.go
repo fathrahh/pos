@@ -2,7 +2,8 @@ package middleware
 
 import (
 	"context"
-	"net/http"
+
+	"github.com/gofiber/fiber/v2"
 
 	"pos-saas/api/pkg/response"
 )
@@ -15,17 +16,19 @@ const (
 	UserIDKey   contextKey = "user_id"
 )
 
-func RequireTenant(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tenantID := r.Header.Get("X-Tenant-ID")
+func RequireTenant() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		tenantID := c.Get("X-Tenant-ID")
 		if tenantID == "" {
-			response.Error(w, http.StatusBadRequest, "Missing X-Tenant-ID header")
-			return
+			return response.Error(c, fiber.StatusBadRequest, "Missing X-Tenant-ID header")
 		}
 
-		ctx := context.WithValue(r.Context(), TenantIDKey, tenantID)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+		c.Locals(string(TenantIDKey), tenantID)
+		ctx := context.WithValue(c.UserContext(), TenantIDKey, tenantID)
+		c.SetUserContext(ctx)
+
+		return c.Next()
+	}
 }
 
 func GetTenantID(ctx context.Context) string {

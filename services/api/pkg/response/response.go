@@ -1,8 +1,7 @@
 package response
 
 import (
-	"encoding/json"
-	"net/http"
+	"github.com/gofiber/fiber/v2"
 )
 
 type Envelope struct {
@@ -12,19 +11,15 @@ type Envelope struct {
 	Error   string `json:"error,omitempty"`
 }
 
-func JSON(w http.ResponseWriter, status int, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(Envelope{
+func JSON(c *fiber.Ctx, status int, data any) error {
+	return c.Status(status).JSON(Envelope{
 		Success: status >= 200 && status < 300,
 		Data:    data,
 	})
 }
 
-func Error(w http.ResponseWriter, status int, message string) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(status)
-	_ = json.NewEncoder(w).Encode(Envelope{
+func Error(c *fiber.Ctx, status int, message string) error {
+	return c.Status(status).JSON(Envelope{
 		Success: false,
 		Error:   message,
 	})
