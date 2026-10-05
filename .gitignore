@@ -1,8 +1,6 @@
 # =============================================================================
-# AI & Agent Context Files (Strictly local, never commit)
+# AI & Agent Context Files
 # =============================================================================
-AGENTS.md
-CLAUDE.md
 .hermes/
 .hermes*
 .cursor/
