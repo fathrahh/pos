@@ -1,0 +1,29 @@
+# AI Agent context files
+AGENTS.md
+.hermes*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node / JS
+node_modules/
+.pnpm-store/
+dist/
+build/
+.svelte-kit/
+.turbo/
+
+# Golang
+bin/
+services/api/tmp/
+*.exe
+*.test
+*.out
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
