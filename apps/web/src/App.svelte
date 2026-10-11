@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FlowState, NavSection } from './lib/types';
   import { mockProducts, mockVouchers, mockPackages, mockOutlets } from './lib/data/mock';
+  import { parseRoute, buildPath } from './lib/router';
 
   import AuthScreen from './lib/components/auth/AuthScreen.svelte';
   import Sidebar from './lib/components/dashboard/Sidebar.svelte';
@@ -11,9 +12,28 @@
   import VouchersView from './lib/components/dashboard/VouchersView.svelte';
   import OutletsView from './lib/components/dashboard/OutletsView.svelte';
 
-  let currentStep = $state<FlowState>('LOGIN');
-  let activeNav = $state<NavSection>('overview');
+  // Read initial route from URL
+  const initial = parseRoute(window.location.pathname);
+  let currentStep = $state<FlowState>(initial.step);
+  let activeNav = $state<NavSection>(initial.nav);
   let selectedOutlet = $state('all');
+
+  // Push new history state when navigating
+  function navigate(step: FlowState, nav: NavSection = 'overview') {
+    currentStep = step;
+    activeNav = nav;
+    const url = buildPath(step, nav);
+    if (window.location.pathname !== url) {
+      window.history.pushState({ step, nav }, '', url);
+    }
+  }
+
+  // Handle browser Previous / Next navigation buttons
+  function onPopState() {
+    const route = parseRoute(window.location.pathname);
+    currentStep = route.step;
+    activeNav = route.nav;
+  }
 
   const products = $state.raw(mockProducts);
   const vouchers = $state.raw(mockVouchers);
@@ -21,15 +41,17 @@
   const outlets = $state.raw(mockOutlets);
 </script>
 
+<svelte:window onpopstate={onPopState} />
+
 <div class="app-viewport">
   {#if currentStep === 'LOGIN'}
-    <AuthScreen onLoginSuccess={() => currentStep = 'DASHBOARD'} />
+    <AuthScreen onLoginSuccess={() => navigate('DASHBOARD', 'overview')} />
   {:else if currentStep === 'DASHBOARD'}
     <div class="dash-shell">
       <Sidebar
         {activeNav}
-        onSelectNav={(nav) => activeNav = nav}
-        onLogout={() => currentStep = 'LOGIN'}
+        onSelectNav={(nav) => navigate('DASHBOARD', nav)}
+        onLogout={() => navigate('LOGIN')}
       />
 
       <main class="dash-main">
@@ -40,7 +62,7 @@
             <OverviewView
               {products}
               {vouchers}
-              onNavigate={(section) => activeNav = section}
+              onNavigate={(section) => navigate('DASHBOARD', section)}
             />
           {:else if activeNav === 'products'}
             <ProductsView {products} />
