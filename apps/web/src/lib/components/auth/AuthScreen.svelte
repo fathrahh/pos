@@ -17,40 +17,19 @@
 </script>
 
 <div class="auth-layout">
-  <!-- Left Editorial Cover Panel -->
-  <aside class="auth-panel-cover">
-    <div class="cover-image-container">
-      <img
-        src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=85"
-        alt="Warm architectural cafe counter"
-        class="cover-image"
-      />
-      <div class="cover-overlay"></div>
+  <!-- Left Decorative Panel: High-End Geometric Graphic (Bondroy Style) -->
+  <aside class="auth-panel-graphic">
+    <div class="graphic-card">
+      <svg class="graphic-canvas" viewBox="0 0 600 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="bondroy-stripes" width="130" height="130" patternUnits="userSpaceOnUse" patternTransform="rotate(58)">
+            <rect width="65" height="130" fill="#18181b" />
+            <rect x="65" width="65" height="130" fill="#f4f4f5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" rx="20" fill="url(#bondroy-stripes)" />
+      </svg>
     </div>
-
-    <div class="cover-topbar">
-      <div class="brand-badge-light">
-        <div class="brand-logo-placeholder"></div>
-        <span class="brand-name-light">Logo Brand</span>
-      </div>
-    </div>
-
-    <div class="cover-content">
-      <h2 class="cover-title">Kelola seluruh cabang dalam satu genggaman.</h2>
-      <p class="cover-subtitle">Pusat kendali katalog menu, HPP produk, voucher promo, dan performa omzet semua outlet.</p>
-      
-      <div class="cover-carousel-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>
-    </div>
-
-    <footer class="cover-footer">
-      <span>v2.4 Backoffice Suite</span>
-      <span>•</span>
-      <span>Owner & Branch Manager Portal</span>
-    </footer>
   </aside>
 
   <!-- Right Form Container -->
@@ -146,120 +125,30 @@
     .auth-layout {
       grid-template-columns: 1fr;
     }
-    .auth-panel-cover {
+    .auth-panel-graphic {
       display: none;
     }
   }
 
-  .auth-panel-cover {
-    position: relative;
-    padding: 3.5rem 3rem;
+  /* Left Panel: Bondroy-inspired geometric container */
+  .auth-panel-graphic {
+    padding: 1.5rem;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
+    align-items: stretch;
   }
 
-  .cover-image-container {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-  }
-
-  .cover-image {
+  .graphic-card {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 4px 20px -2px oklch(0% 0 0 / 0.08);
   }
 
-  .cover-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(15, 23, 42, 0.35) 0%,
-      rgba(15, 23, 42, 0.55) 45%,
-      rgba(15, 23, 42, 0.90) 100%
-    );
-  }
-
-  .cover-topbar {
-    position: relative;
-    z-index: 1;
-  }
-
-  .brand-badge-light {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .brand-logo-placeholder {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.2);
-    border: 1.5px dashed rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(4px);
-  }
-
-  .brand-name-light {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    color: #ffffff;
-  }
-
-  .cover-content {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 2rem;
-  }
-
-  .cover-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    color: #ffffff;
-    line-height: 1.3;
-    margin: 0 0 0.75rem 0;
-    max-width: 380px;
-  }
-
-  .cover-subtitle {
-    font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.5;
-    margin: 0 0 1.75rem 0;
-    max-width: 360px;
-  }
-
-  .cover-carousel-dots {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .cover-carousel-dots .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.3);
-  }
-
-  .cover-carousel-dots .dot.active {
-    width: 20px;
-    border-radius: 3px;
-    background: #ffffff;
-  }
-
-  .cover-footer {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+  .graphic-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
   }
 
   .auth-form-wrap {
