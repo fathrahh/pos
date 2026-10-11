@@ -60,7 +60,18 @@ Every tenant-scoped table MUST include:
 - **`manager`**: Outlet-scoped product/stock management, staff scheduling, outlet-level profit and loss reporting.
 - **`cashier`**: POS terminal only (record sales, open/close shifts, print receipts, no margin/HPP visibility).
 
-### 3.4 GORM Multi-Tenant Leak Prevention (CRITICAL)
+### 3.4 Application Boundaries: Web Dashboard vs POS Cashier Terminal
+- **Web App (`apps/web`):**
+  - **Scope:** Pure Backoffice & Management Dashboard.
+  - **Target Persona:** Owner & Branch/Store Manager.
+  - **Core Capabilities:** Manage master products & variants, HPP/COGS, tiered pricing, packages/bundles, discount vouchers, multi-outlet stock inventory, staff roles, and analytics.
+  - **Strict Constraint:** **NO POS cashier terminal/shift keypad mode on Web.**
+- **POS Cashier Terminal (`apps/mobile` or dedicated tablet app — Phase 2 Spec):**
+  - **Device Pairing Model (Planned for Phase 2):**
+    1. One-time Master Setup: Owner/Manager logs in with email/pass to select outlet & provision a persistent `device_token`.
+    2. Staff Cashier Fast Switch: 4-6 digit numeric PIN lock screen for cashiers to start shift, record orders, and print receipts without exposing master business credentials.
+
+### 3.5 GORM Multi-Tenant Leak Prevention (CRITICAL)
 - **Rule:** Never execute raw `db.Find()` or `db.Where()` without tenant isolation.
 - **Mechanism:** Implement GORM plugin / scope extracting `tenant_id` from `context.Context`. If `tenant_id` is missing in context during an isolated query, the transaction MUST abort with an error.
 
