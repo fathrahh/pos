@@ -12,27 +12,45 @@
   import VouchersView from './lib/components/dashboard/VouchersView.svelte';
   import OutletsView from './lib/components/dashboard/OutletsView.svelte';
 
-  // Read initial route from URL
-  const initial = parseRoute(window.location.pathname);
+  // Parse initial route including ?redirect=...
+  const initial = parseRoute(window.location.pathname, window.location.search);
   let currentStep = $state<FlowState>(initial.step);
   let activeNav = $state<NavSection>(initial.nav);
+  let redirectTarget = $state<string | undefined>(initial.redirectUrl);
   let selectedOutlet = $state('all');
 
-  // Push new history state when navigating
-  function navigate(step: FlowState, nav: NavSection = 'overview') {
+  function navigate(step: FlowState, nav: NavSection = 'overview', redirect?: string) {
     currentStep = step;
     activeNav = nav;
-    const url = buildPath(step, nav);
-    if (window.location.pathname !== url) {
-      window.history.pushState({ step, nav }, '', url);
+    redirectTarget = redirect;
+
+    const url = buildPath(step, nav, redirect);
+    const currentFullUrl = window.location.pathname + window.location.search;
+    if (currentFullUrl !== url) {
+      window.history.pushState({ step, nav, redirect }, '', url);
     }
   }
 
-  // Handle browser Previous / Next navigation buttons
+  function handleLoginSuccess() {
+    if (redirectTarget) {
+      const target = parseRoute(redirectTarget);
+      navigate(target.step, target.nav);
+    } else {
+      navigate('DASHBOARD', 'overview');
+    }
+  }
+
+  function handleLogout() {
+    // Simpan path aktif saat ini sebagai param ?redirect=...
+    const currentDashboardPath = buildPath('DASHBOARD', activeNav);
+    navigate('LOGIN', 'overview', currentDashboardPath);
+  }
+
   function onPopState() {
-    const route = parseRoute(window.location.pathname);
+    const route = parseRoute(window.location.pathname, window.location.search);
     currentStep = route.step;
     activeNav = route.nav;
+    redirectTarget = route.redirectUrl;
   }
 
   const products = $state.raw(mockProducts);
@@ -45,13 +63,13 @@
 
 <div class="app-viewport">
   {#if currentStep === 'LOGIN'}
-    <AuthScreen onLoginSuccess={() => navigate('DASHBOARD', 'overview')} />
+    <AuthScreen onLoginSuccess={handleLoginSuccess} />
   {:else if currentStep === 'DASHBOARD'}
     <div class="dash-shell">
       <Sidebar
         {activeNav}
         onSelectNav={(nav) => navigate('DASHBOARD', nav)}
-        onLogout={() => navigate('LOGIN')}
+        onLogout={handleLogout}
       />
 
       <main class="dash-main">

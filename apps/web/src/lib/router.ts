@@ -3,15 +3,24 @@ import type { FlowState, NavSection } from './types';
 export interface RouteState {
   step: FlowState;
   nav: NavSection;
+  redirectUrl?: string;
 }
 
 const VALID_NAVS: NavSection[] = ['overview', 'products', 'packages', 'vouchers', 'outlets'];
 
-export function parseRoute(pathname: string): RouteState {
+export function parseRoute(pathname: string, search: string = ''): RouteState {
   const cleanPath = pathname.replace(/^\/+|\/+$/g, '');
+  const params = new URLSearchParams(search);
+  const redirect = params.get('redirect') || undefined;
 
-  if (!cleanPath || cleanPath === 'login') {
-    return { step: 'LOGIN', nav: 'overview' };
+  // Root "/" defaults to dashboard overview
+  if (!cleanPath) {
+    return { step: 'DASHBOARD', nav: 'overview' };
+  }
+
+  // Explicit "/login"
+  if (cleanPath === 'login') {
+    return { step: 'LOGIN', nav: 'overview', redirectUrl: redirect };
   }
 
   const segments = cleanPath.split('/');
@@ -28,11 +37,15 @@ export function parseRoute(pathname: string): RouteState {
     return { step: 'DASHBOARD', nav: segments[0] as NavSection };
   }
 
-  return { step: 'LOGIN', nav: 'overview' };
+  // Unknown route falls back to dashboard overview
+  return { step: 'DASHBOARD', nav: 'overview' };
 }
 
-export function buildPath(step: FlowState, nav: NavSection): string {
+export function buildPath(step: FlowState, nav: NavSection, redirectUrl?: string): string {
   if (step === 'LOGIN') {
+    if (redirectUrl) {
+      return `/login?redirect=${encodeURIComponent(redirectUrl)}`;
+    }
     return '/login';
   }
   return `/dashboard/${nav}`;
