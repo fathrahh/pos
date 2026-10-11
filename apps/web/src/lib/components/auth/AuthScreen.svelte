@@ -17,18 +17,26 @@
 </script>
 
 <div class="auth-layout">
-  <!-- Left Decorative Panel: High-End Geometric Graphic (Bondroy Style) -->
+  <!-- Left Decorative Panel: High-Fashion Editorial Cover (Generated Aesthetic) -->
   <aside class="auth-panel-graphic">
     <div class="graphic-card">
-      <svg class="graphic-canvas" viewBox="0 0 600 900" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <pattern id="bondroy-stripes" width="130" height="130" patternUnits="userSpaceOnUse" patternTransform="rotate(58)">
-            <rect width="65" height="130" fill="#18181b" />
-            <rect x="65" width="65" height="130" fill="#f4f4f5" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" rx="20" fill="url(#bondroy-stripes)" />
-      </svg>
+      <div class="graphic-cover-wrap">
+        <img
+          src="/pos_cover_1.jpg"
+          alt="Artisanal barista latte craft"
+          class="graphic-photo"
+        />
+        <div class="photo-gradient-overlay"></div>
+        <div class="photo-badge-chip">AURA BACKOFFICE</div>
+        <div class="photo-caption-bottom">
+          <p class="photo-quote">"Pencatatan kasir dan manajemen cabang yang tenang, presisi, dan terintegrasi."</p>
+          <div class="carousel-dots-white">
+            <span class="c-dot active"></span>
+            <span class="c-dot"></span>
+            <span class="c-dot"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </aside>
 
@@ -130,7 +138,7 @@
     }
   }
 
-  /* Left Panel: Bondroy-inspired geometric container */
+  /* Left Panel: High-Fashion Editorial Cover Container */
   .auth-panel-graphic {
     padding: 1.5rem;
     display: flex;
@@ -142,13 +150,86 @@
     height: 100%;
     border-radius: var(--radius-lg);
     overflow: hidden;
+    position: relative;
     box-shadow: 0 4px 20px -2px oklch(0% 0 0 / 0.08);
   }
 
-  .graphic-canvas {
+  .graphic-cover-wrap {
     width: 100%;
     height: 100%;
+    position: relative;
+  }
+
+  .graphic-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
     display: block;
+  }
+
+  .photo-gradient-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.25) 0%,
+      rgba(15, 23, 42, 0.4) 40%,
+      rgba(15, 23, 42, 0.85) 100%
+    );
+  }
+
+  .photo-badge-chip {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .photo-caption-bottom {
+    position: absolute;
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .photo-quote {
+    color: #ffffff;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    margin: 0;
+    max-width: 380px;
+  }
+
+  .carousel-dots-white {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .carousel-dots-white .c-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    transition: all 200ms ease;
+  }
+
+  .carousel-dots-white .c-dot.active {
+    width: 22px;
+    border-radius: 3px;
+    background: #ffffff;
   }
 
   .auth-form-wrap {
