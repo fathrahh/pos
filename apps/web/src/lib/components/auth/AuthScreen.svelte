@@ -6,6 +6,43 @@
   let showPassword = $state(false);
   let isSubmitting = $state(false);
 
+  // Carousel slide state
+  const slides = [
+    {
+      badge: "KATALOG & HPP",
+      title: "Kontrol margin kotor dan COGS menu secara real-time.",
+      sub: "Hitung otomatis snapshot harga bahan baku untuk setiap porsi yang terjual."
+    },
+    {
+      badge: "MULTI-OUTLET",
+      title: "Pantau performa penjualan seluruh cabang dari satu pintu.",
+      sub: "Isolasi data antar outlet terjamin aman dengan konsolidasi laporan instan."
+    },
+    {
+      badge: "PROMOSI & PAKET",
+      title: "Rancang voucher diskon dan bundle combo fleksibel.",
+      sub: "Atur kuota pemakaian, minimum transaksi, dan masa berlaku program promo."
+    }
+  ];
+
+  let currentSlide = $state(0);
+
+  function nextSlide() {
+    currentSlide = (currentSlide + 1) % slides.length;
+  }
+
+  function setSlide(index: number) {
+    currentSlide = index;
+  }
+
+  // Auto rotate carousel every 4.5 seconds
+  $effect(() => {
+    const timer = setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+    }, 4500);
+    return () => clearInterval(timer);
+  });
+
   function handleSubmit(e: SubmitEvent) {
     e.preventDefault();
     isSubmitting = true;
@@ -27,13 +64,20 @@
           class="graphic-photo"
         />
         <div class="photo-gradient-overlay"></div>
-        <div class="photo-badge-chip">AURA BACKOFFICE</div>
+        <div class="photo-badge-chip">{slides[currentSlide].badge}</div>
         <div class="photo-caption-bottom">
-          <p class="photo-quote">"Pencatatan kasir dan manajemen cabang yang tenang, presisi, dan terintegrasi."</p>
+          <h2 class="photo-title">{slides[currentSlide].title}</h2>
+          <p class="photo-subtitle">{slides[currentSlide].sub}</p>
           <div class="carousel-dots-white">
-            <span class="c-dot active"></span>
-            <span class="c-dot"></span>
-            <span class="c-dot"></span>
+            {#each slides as _, i}
+              <button
+                type="button"
+                class="c-dot"
+                class:active={currentSlide === i}
+                onclick={() => setSlide(i)}
+                aria-label={`Slide ${i + 1}`}
+              ></button>
+            {/each}
           </div>
         </div>
       </div>
@@ -203,32 +247,44 @@
     gap: 1.25rem;
   }
 
-  .photo-quote {
+  .photo-title {
     color: #ffffff;
-    font-size: 1.125rem;
-    font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: -0.015em;
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
     margin: 0;
+    max-width: 420px;
+  }
+
+  .photo-subtitle {
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin: -0.5rem 0 0 0;
     max-width: 380px;
   }
 
   .carousel-dots-white {
     display: flex;
     gap: 0.5rem;
+    margin-top: 0.5rem;
   }
 
   .carousel-dots-white .c-dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border: none;
+    cursor: pointer;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.4);
-    transition: all 200ms ease;
+    background: rgba(255, 255, 255, 0.35);
+    transition: all 220ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .carousel-dots-white .c-dot.active {
-    width: 22px;
-    border-radius: 3px;
+    width: 26px;
+    border-radius: 4px;
     background: #ffffff;
   }
 
